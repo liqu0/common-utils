@@ -25,10 +25,21 @@ Encrypting:
 
 Decrypting:
   Split input by "!", put parts in variable segments
-  For each part:
+  Create output variable
+  For each part in segments:
     (Start procedure to convert counting system expression to integer)
     Create int variable as 0
     For each number in range of 0 to length of part as i:
       Add (the index of part[i] in Options[Counting system characters] times (the length of Options[Counting system characters]) to the power of (length of part minus 1 minus i)) to int
     (End procedure)
-    #unfinished
+    Convert int variable to binary
+    Pad int with 0s until its length reaches a multiple of Options[Binary split size]
+    For each Options[Binary split size] of int as char:
+      Convert char to decimal integer
+      Append the ordinal of code point char to output
+  Return output
+
+Key:
+  Character set length (less than 1257)
+  Binary split length
+  Split sizes (replace "!")

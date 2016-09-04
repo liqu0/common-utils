@@ -33,3 +33,17 @@ def encrypt(expr):
         splitted_strings[_c] = output
         _c += 1
     return "!".join(splitted_strings)
+
+def decrypt(expr):
+    segments = expr.split("!")
+    output = ""
+    for part in segments:
+        int_repr = 0
+        for i in range(len(part)):
+            int_repr += lencrypt_options["chars"].index(part[i]) * (len(lencrypt_options["chars"]) ** (len(part) - 1 - i))
+        int_repr = bin(int_repr)[2:]
+        while len(int_repr) % lencrypt_options["binary_length"] != 0:
+            int_repr = "0" + int_repr
+        for i in range(0, len(int_repr), lencrypt_options["binary_length"]):
+            output += chr(int(int_repr[i:i+lencrypt_options["binary_length"]], 2))
+    return output
