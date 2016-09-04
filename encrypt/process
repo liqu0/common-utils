@@ -1,0 +1,34 @@
+Options:
+  Counting system characters
+  String split size
+  Binary split size
+
+Encrypting:
+  Split input string by Option[String split size], ignore uneven split strings
+  For each part:
+    Create binary string variable
+    For each character of part:
+      Get the Unicode code point for this character
+      Convert it to binary
+      Pad the binary with 0 in front so the length of the binary equals Option[Binary split size]
+      Append binary string with padded binary
+    Create int variable as integer
+    Convert binary string to integer, and place it in int
+    (Following converts the decimal representing this part to custom counting system)
+    Create output variable as string
+    While int is more than 1:
+      Add Options[Counting system characters]'s character at (int % length of Options[Counting system characters]) to front of output
+      Divide int by length of Options[Counting system characters]
+      Floor int
+    Set part to output
+  Return edited parts, joined with "!" as string
+
+Decrypting:
+  Split input by "!", put parts in variable segments
+  For each part:
+    (Start procedure to convert counting system expression to integer)
+    Create int variable as 0
+    For each number in range of 0 to length of part as i:
+      Add (the index of part[i] in Options[Counting system characters] times (the length of Options[Counting system characters]) to the power of (length of part minus 1 minus i)) to int
+    (End procedure)
+    #unfinished
