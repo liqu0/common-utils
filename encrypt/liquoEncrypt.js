@@ -1,11 +1,11 @@
 // Convert a string to LiquoEncryption encoding.
 const LiquoEncrypt = (function() {
-  var options = {
+  var defaultOptions = {
     unicodeCharacterRanges: [[34, 127], [161, 768], [910, 930], [931, 1154], [1162, 1328], [1329, 1366], [1377, 1416], [1488, 1515], [1566, 1611]],
     splitSize: 3,
     charsFunction: function() {
       var output = [];
-      for(var range of options.unicodeCharacterRanges){
+      for(var range of defaultOptions.unicodeCharacterRanges){
         for(var i = range[0]; i < range[1]; i++){
           output += String.fromCharCode(i);
         }
@@ -13,14 +13,49 @@ const LiquoEncrypt = (function() {
       return output;
     }
   };
-  options.chars = options.charsFunction();
-  options.binaryLength = options.chars.length.toString(2).length;
+  defaultOptions.chars = defaultOptions.charsFunction();
+  defaultOptions.binaryLength = defaultOptions.chars.length.toString(2).length;
 
-  function $c(str){
+  var SessionOptions = function(charLength, binarySplitLength, splitSizes){
+    this.chars = defaultOptions.chars.substring(0, charLength) || defaultOptions.chars;
+    this.binarySplitLength = binarySplitLength || defaultOptions.binaryLength;
+    this.splitSizes = splitSizes || [];
+  }
+
+  SessionOptions.randomOptions = function() {
+    function randInt(min, max){
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+    return new SessionOptions(
+      randInt(Math.floor(defaultOptions.chars.length / 2), defaultOptions.chars.length + 1),
+      randInt(defaultOptions.binaryLength - 2, defaultOptions.binaryLength + 4)
+    );
+  }
+
+  SessionOptions.prototype.createKey = function() {
+    var output = defaultOptions.chars[this.chars.length % defaultOptions.chars.length];
+    output += defaultOptions.chars[this.binarySplitLength];
+    for(var splitSize of this.splitSizes){
+      output += defaultOptions.chars[splitSize];
+    }
+    return output;
+  }
+
+  SessionOptions.fromKey = function(key){
+    var charLength = defaultOptions.chars.indexOf(key[0]) === 0 ? defaultOptions.chars.length : defaultOptions.chars.indexOf(key[0]);
+    var binarySplitLength = defaultOptions.chars.indexOf(key[1]);
+    var splitSizes = [];
+    for(var char of key.substring(2).split("")){
+      splitSizes.push(defaultOptions.chars.indexOf(char))
+    }
+    return new SessionOptions(charLength, binarySplitLength, splitSizes);
+  }
+
+  function $c(str, opts){
     var binString = "";
     for(var char of str){
       var charBinary = char.charCodeAt(0).toString(2);
-      while(charBinary.length < options.binaryLength){
+      while(charBinary.length < opts.binarySplitLength){
         charBinary = "0" + charBinary;
       }
       binString += charBinary;
@@ -28,50 +63,76 @@ const LiquoEncrypt = (function() {
     return parseInt(binString, 2);
   }
 
-  function $d(int){
+  function $d(int, opts){
     var binString = int.toString(2);
-    var target = options.binaryLength - (binString.length % options.binaryLength) + binString.length;
+    var target = opts.binarySplitLength - (binString.length % opts.binarySplitLength) + binString.length;
     while(binString.length < target){
       binString = "0" + binString;
     }
     var output = "";
-    for(var i = 0; i < binString.length; i += options.binaryLength){
-      output += String.fromCharCode(parseInt(binString.substring(i, i + options.binaryLength), 2));
+    for(var i = 0; i < binString.length; i += opts.binarySplitLength){
+      output += String.fromCharCode(parseInt(binString.substring(i, i + opts.binarySplitLength), 2));
     }
     return output;
   }
 
-  function $a(num){
+  function $a(num, opts){
     var output = "";
     while(num >= 1){
-      output = options.chars[num % options.chars.length] + output;
-      num = Math.floor(num / options.chars.length);
+      output = opts.chars[num % opts.chars.length] + output;
+      num = Math.floor(num / opts.chars.length);
     }
     return output;
   }
 
-  function $b(expr){
+  function $b(expr, opts){
     var output = 0;
     for(var i = expr.length-1; i >= 0; i--){
-      output += options.chars.indexOf(expr[i]) * Math.pow(options.chars.length, expr.length-1-i);
+      output += opts.chars.indexOf(expr[i]) * Math.pow(opts.chars.length, expr.length-1-i);
     }
     return output;
   }
 
-  function $e(str){
+  function $e(str, opts){
     var output = [];
-    for(var i = 0; i < str.length; i+=options.splitSize){
-      output.push(str.substring(i, (i+options.splitSize >= str.length ? str.length : i+options.splitSize)));
+    for(var i = 0; i < str.length; i+=defaultOptions.splitSize){
+      output.push(str.substring(i, (i+defaultOptions.splitSize >= str.length ? str.length : i+defaultOptions.splitSize)));
     }
+    return output;
+  }
+
+  function $f(str, opts){
+    var output = [];
+    var cursor = 0;
+    for(var splitLength of opts.splitSizes){
+      output.push(str.substring(cursor, cursor+splitLength));
+      cursor += splitLength;
+    }
+    delete cursor;
     return output;
   }
 
   return {
-    encrypt: function(item) {
-      return $e(item.toString()).map($c).map($a).join("!");
+    encrypt: function(item, needKey) {
+      var options = needKey ? SessionOptions.randomOptions() : new SessionOptions();
+      var unjoinedStrings = $e(item.toString())
+          .map(function(item){return $c(item, options)})
+          .map(function(item){return $a(item, options)});
+      if(!needKey){
+        return {encrypted: unjoinedStrings.join("!"), key: null};
+      }else{
+        for(var string of unjoinedStrings){
+          options.splitSizes.push(string.length);
+        }
+        return {encrypted: unjoinedStrings.join(""), key: options.createKey()};
+      }
     },
-    decrypt: function(expression){
-      return expression.split("!").map($b).map($d).join("");
+    decrypt: function(expression, key){
+      var options = key ? SessionOptions.fromKey(key) : new SessionOptions();
+      return (key ? $f(expression, options) : expression.split("!"))
+          .map(function(item){return $b(item, options)})
+          .map(function(item){return $d(item, options)})
+          .join("");
     }
   };
 })();
