@@ -83,8 +83,11 @@ public class Node {
 		return this.values.get(name);
 	}
 
-	public void addChild(String name) {
+	public boolean addChild(String name) {
+		if (this.getChild(name) != null)
+			return false;
 		this.children.add(new Node(name));
+		return true;
 	}
 
 	public Node getChild(String name) {

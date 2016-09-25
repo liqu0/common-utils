@@ -67,8 +67,12 @@ class NodeNavigator {
 		return currentNode;
 	}
 
-	navigateTo(expr: string) : AppNode {
+	getNodeByPath(expr: string) : AppNode {
 		return this.navigate(this.parseExpression(expr), false);
+	}
+
+	createFolders(expr: string) : AppNode {
+		return this.navigate(this.parseExpression(expr), true);
 	}
 
 	getValue(expr: string, createFolders: boolean) : any {
