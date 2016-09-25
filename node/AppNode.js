@@ -40,7 +40,8 @@ var NodeNavigator = (function () {
     };
     NodeNavigator.prototype.navigate = function (paths, createFolders) {
         var currentNode = this.rootNode;
-        for (var path in paths) {
+        for (var _i = 0, paths_1 = paths; _i < paths_1.length; _i++) {
+            var path = paths_1[_i];
             var nextChild = currentNode.getChild(path);
             if (nextChild == undefined) {
                 if (!createFolders)
@@ -51,8 +52,11 @@ var NodeNavigator = (function () {
         }
         return currentNode;
     };
-    NodeNavigator.prototype.navigateTo = function (expr) {
+    NodeNavigator.prototype.getNodeByPath = function (expr) {
         return this.navigate(this.parseExpression(expr), false);
+    };
+    NodeNavigator.prototype.createFolders = function (expr) {
+        return this.navigate(this.parseExpression(expr), true);
     };
     NodeNavigator.prototype.getValue = function (expr, createFolders) {
         var paths = this.parseExpression(expr);

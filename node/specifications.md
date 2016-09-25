@@ -4,8 +4,8 @@
 
 * Node _(may use alternative if occupied)_
 * NodeNavigator _(Node.Navigator if cannot define multiple classes in one file)_
-
 _For function names, languages should follow their specific styling guidelines_
+
 ---
 
 ## Node
@@ -43,6 +43,15 @@ Returns: "[Node#" + name of this node + "]"
 
 #### name
 Synopsis: name of this node.
+Type: string
+
+#### children
+Synopsis: all child nodes under this node.
+Type: collection of nodes
+
+#### values
+Synopsis: a map of all values under this node.
+Type: map of string to object (any)
 
 ---
 
@@ -56,4 +65,36 @@ Synopsis: create a NodeNavigator based on the given root node, parsing paths usi
 
 #### navigate
 `private`
-Arguments: (to be finished)
+Arguments: paths as string array, create folders? as boolean
+Synopsis: navigates from the root node along the specified path, throwing an error if the next node does not exist and create folders? is false.
+Returns: node with the specified path in relation to the root node; its name is same as the last element in paths.
+
+#### getNodeByPath
+Argument: path as string
+Synopsis: navigates along the specified path to return the last node of the path.
+Returns: the last node of the specified path.
+
+#### createFolders
+Argument: path as string
+Synopsis: navigates along the specified path to return the last node of the path, creating nodes when necessary.
+Returns: the last node of the specified path.
+
+#### getValue
+Argument: path as string
+Synopsis: retrieves the specified value along the specified path.
+Returns: the value retrieved using the specified path.
+
+#### setValue
+Arguments: path as string, value as object (any)
+Synopsis: retrieves reference to the specified value along the specified path, then sets it to the specified value.
+Returns: nothing
+
+### Fields
+
+#### delimiter
+Synopsis: a string that acts as a delimiter when parsing a path to segments.
+Type: a string
+
+#### rootNode
+Synopsis: the base node that this navigator does all of its navigation upon.
+Type: Node

@@ -53,7 +53,7 @@ class NodeNavigator {
 
 	private navigate(paths: string[], createFolders: boolean) : AppNode {
 		let currentNode: AppNode = this.rootNode;
-		for (let path in paths) {
+		for (let path of paths) {
 
 			let nextChild = currentNode.getChild(path);
 			if (nextChild == undefined) {
