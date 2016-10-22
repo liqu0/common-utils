@@ -1,20 +1,20 @@
 class AppNode {
 	name: string;
 	children: AppNode[];
-	values: {[key: string]: any};
+	value: any;
 	
 	constructor(name: string) {
 		this.name = name;
 		this.children = [];
-		this.values = {};
+		this.value = null;
 	}
 
-	setValue(key: string, val: any) : void {
-		this.values[key] = val;
+	setValue(val: any) : void {
+		this.value = val;
 	}
 
-	getValue(key: string) : any {
-		return this.values[key];
+	getValue() : any {
+		return this.value;
 	}
 
 	getChild(name: string) : AppNode {
@@ -76,12 +76,10 @@ class NodeNavigator {
 	}
 
 	getValue(expr: string, createFolders: boolean) : any {
-		let paths: string[] = this.parseExpression(expr);
-		return this.navigate(paths.slice(0, -1), createFolders).getValue(paths.slice(-1)[0]);
+		return this.navigate(this.parseExpression(expr), createFolders).getValue();
 	}
 
 	setValue(expr: string, val: any, createFolders: boolean) : void {
-		let paths: string[] = this.parseExpression(expr);
-		this.navigate(paths.slice(0, -1), createFolders).setValue(paths.slice(-1)[0], val);
+		this.navigate(this.parseExpression(expr), createFolders).setValue(val);
 	}
 }

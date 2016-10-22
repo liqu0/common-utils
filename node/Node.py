@@ -3,7 +3,7 @@ class Node(object):
 	def __init__(self, name):
 		self.name = name
 		self.children = []
-		self.values = {}
+		self.value = None
 
 	def get_child(self, name):
 		for child in self.children:
@@ -16,11 +16,11 @@ class Node(object):
 		self.children.append(Node(name))
 		return True
 
-	def get_value(self, name):
-		return self.values.get(name)
+	def get_value(self):
+		return self.value
 
-	def set_value(self, name, val):
-		self.values[name] = val
+	def set_value(self, val):
+		self.value = val
 
 	def __str__(self):
 		return "[Node#{}]".format(self.name)
@@ -33,15 +33,12 @@ class NodeNavigator(object):
 
 	def _nav(self, paths, create):
 		current_node = self.root_node
-		next_node = None
 		for path in paths:
-			next_node = current_node.get_child(path)
-			if next_node == None:
-				if not create:
-					raise Exception("while navigating through node {}, child with name {} does not exist".format(current_node, path))
+			if create:
 				current_node.add_child(path)
-				next_node = current_node.get_child(path)
-			current_node = next_node
+			current_node = current_node.get_child(path)
+			if current_node == None:
+				raise Exception("while navigating through node {}, child with name {} does not exist".format(current_node, path))
 		return current_node
 
 	def get_node(self, path):
@@ -51,12 +48,10 @@ class NodeNavigator(object):
 		return self._nav(path.split(self.delim), True)
 
 	def get_value(self, path):
-		paths = path.split(self.delim)
-		return self._nav(paths[:-1], False).get_value(paths[-1])
+		return self._nav(path.split(self.delim), False).get_value()
 
 	def set_value(self, path, val):
-		paths = path.split(self.delim)
-		self._nav(paths[:-1], True).set_value(paths[-1], val)
+		self._nav(path.split(self.delim), True).set_value(val)
 		
 
 # Testing starts here

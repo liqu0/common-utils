@@ -1,33 +1,33 @@
 package main
 
 import (
-	"fmt"
-	"strings"
 	"bufio"
+	"fmt"
 	"os"
+	"strings"
 )
 
 type Node struct {
-	name string
+	name     string
 	children map[*Node]bool
-	values map[string]interface{}
+	value    *interface{}
 }
 
 type NodeNavigator struct {
-	delim string
+	delim    string
 	BaseNode *Node
 }
 
 func NewNode(name string) *Node {
-	return &Node{name, make(map[*Node]bool), make(map[string]interface{})}
+	return &Node{name, make(map[*Node]bool), nil}
 }
 
-func (n *Node) GetValue(key string) interface{} {
-	return n.values[key];
+func (n *Node) GetValue() *interface{} {
+	return n.value
 }
 
-func (n *Node) SetValue(key string, val interface{}) {
-	n.values[key] = val;
+func (n *Node) SetValue(val interface{}) {
+	n.value = &val
 }
 
 func (n *Node) GetChild(name string) *Node {
@@ -58,7 +58,7 @@ func (nn *NodeNavigator) navigate(paths []string, create bool) *Node {
 	for _, path := range paths {
 		if currentNode.GetChild(path) == nil {
 			if !create {
-				fmt.Printf("NodeNavigator navigation error: while navigating through node %v, next child %s does not exist", currentNode, path)
+				fmt.Printf("NodeNavigator navigation error: while navigating through node %v, next child %s does not exist\n", currentNode, path)
 			} else {
 				currentNode.AddChild(path)
 			}
@@ -76,14 +76,12 @@ func (nn *NodeNavigator) CreateFolders(path string) *Node {
 	return nn.navigate(strings.Split(path, nn.delim), true)
 }
 
-func (nn *NodeNavigator) GetValue(path string) interface{} {
-	parsedPath := strings.Split(path, nn.delim)
-	return nn.navigate(parsedPath[:len(parsedPath) - 1], false).GetValue(parsedPath[len(parsedPath) - 1])
+func (nn *NodeNavigator) GetValue(path string) *interface{} {
+	return nn.navigate(strings.Split(path, nn.delim), false).GetValue()
 }
 
 func (nn *NodeNavigator) SetValue(path string, val interface{}) {
-	parsedPath := strings.Split(path, nn.delim)
-	nn.navigate(parsedPath[:len(parsedPath) - 1], true).SetValue(parsedPath[len(parsedPath)-1], val)
+	nn.navigate(strings.Split(path, nn.delim), true).SetValue(val)
 }
 
 // Start testing
@@ -93,14 +91,14 @@ func main() {
 	MainNode := NewNode("MainNode")
 	MainNavigator := NodeNavigator{"MainNavigator", MainNode}
 
-	for ;; {
+	for {
 		fmt.Print(":> ")
 		rawInput, _ := Read.ReadString('\n')
 		rawInput = strings.TrimSuffix(rawInput, "\n")
 		input := strings.Split(rawInput, " ")
 		switch input[0] {
 		case "get":
-			fmt.Println(MainNavigator.GetValue(input[1]))
+			fmt.Println(*MainNavigator.GetValue(input[1]))
 		case "set":
 			MainNavigator.SetValue(input[1], input[2])
 		default:

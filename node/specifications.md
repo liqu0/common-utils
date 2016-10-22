@@ -18,14 +18,14 @@ _For function names, languages should follow their specific styling guidelines_
 * Synopsis: create an empty node.
 
 #### setValue
-* Arguments: name of value as string, value as object
-* Synopsis: set value of given name to given value under this node.
+* Arguments: value as object
+* Synopsis: set value of this node
 * Returns: nothing
 
 #### getValue
-* Argument: name of value as string
-* Synopsis: get value of given name under this node.
-* Returns: value of given name
+* Argument: none
+* Synopsis: get value of this node
+* Returns: value of this node, or `null` if it has not been set.
 
 #### addChild
 * Argument: name of node (child) as string
@@ -75,7 +75,7 @@ _For function names, languages should follow their specific styling guidelines_
 * Synopsis: navigates along the specified path to return the last node of the path.
 * Returns: the last node of the specified path.
 
-#### createFolders
+#### createNodes
 * Argument: path as string
 * Synopsis: navigates along the specified path to return the last node of the path, creating nodes when necessary.
 * Returns: the last node of the specified path.

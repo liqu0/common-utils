@@ -2,13 +2,13 @@ var AppNode = (function () {
     function AppNode(name) {
         this.name = name;
         this.children = [];
-        this.values = {};
+        this.value = null;
     }
-    AppNode.prototype.setValue = function (key, val) {
-        this.values[key] = val;
+    AppNode.prototype.setValue = function (val) {
+        this.value = val;
     };
-    AppNode.prototype.getValue = function (key) {
-        return this.values[key];
+    AppNode.prototype.getValue = function () {
+        return this.value;
     };
     AppNode.prototype.getChild = function (name) {
         for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
@@ -59,12 +59,10 @@ var NodeNavigator = (function () {
         return this.navigate(this.parseExpression(expr), true);
     };
     NodeNavigator.prototype.getValue = function (expr, createFolders) {
-        var paths = this.parseExpression(expr);
-        return this.navigate(paths.slice(0, -1), createFolders).getValue(paths.slice(-1)[0]);
+        return this.navigate(this.parseExpression(expr), createFolders).getValue();
     };
     NodeNavigator.prototype.setValue = function (expr, val, createFolders) {
-        var paths = this.parseExpression(expr);
-        this.navigate(paths.slice(0, -1), createFolders).setValue(paths.slice(-1)[0], val);
+        this.navigate(this.parseExpression(expr), createFolders).setValue(val);
     };
     return NodeNavigator;
 }());
