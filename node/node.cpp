@@ -24,13 +24,14 @@ public:
     return &this->value;
   }
 
-  void AddChild(std::string name) {
+  bool AddChild(std::string name) {
     // child should not exist
     if (this->GetChild(name) != NULL)
-      return;
+      return false;
 
     Node* child = new Node(name);
     this->children.insert(child);
+    return true;
   }
 
   Node* GetChild(std::string name) {
@@ -64,39 +65,39 @@ public:
     this->rootNode = root;
     this->delimiter = delim;
   }
-  
+
   Node<T>* GetNodeByPath(std::string& path) {
     return this->navigate(this->split(path), false);
   }
-  
+
   Node<T>* CreateNodes(std::string& path) {
     return this->navigate(this->split(path), true);
   }
-  
+
   T* GetValue(std::string& path) {
     return this->navigate(this->split(path), false)->GetValue();
   }
-  
+
   void SetValue(std::string& path, T& value) {
     this->navigate(this->split(path), true)->SetValue(value);
   }
-  
+
 private:
   char delimiter;
   Node<T>* rootNode;
-  
+
   std::vector<std::string> split(const std::string& input) {
     std::stringstream sstr(input);
     std::string seg;
     std::vector<std::string> segList;
-    
+
     while (std::getline(sstr, seg, this->delimiter)) {
       segList.push_back(seg);
     }
-    
+
     return segList;
   }
-  
+
   Node<T>* navigate(std::vector<std::string> paths, bool create) {
     Node<T>* currentNode = this->rootNode;
     for (std::string& path: paths) {
@@ -110,48 +111,47 @@ private:
   }
 };
 
+/* The following lines are only for testing */
+
+std::vector<std::string> TokenSplit(std::string& str, char delim) {
+  std::stringstream stream(str);
+  std::string token;
+  std::vector<std::string> tokenList;
+
+  while (std::getline(stream, token, delim)) {
+    tokenList.push_back(token);
+  }
+
+  return tokenList;
+}
+
 int main(int argc, char const *argv[])
 {
   // testing purposes only
   Node<std::string> MainNode("Main-node");
   std::cout << MainNode << std::endl;
   NodeNavigator<std::string> Navigator(&MainNode, '/');
-  
-  std::string path;
-  std::string value;
-  char action;
-  std::string inputBuffer;
+
+  std::string input;
+  std::vector<std::string> args;
   std::string* nsValue;
   while (true) {
-    std::cout << "path >>";
-    std::getline(std::cin, path);
-
-    while (true) {
-      std::cout << "action (s,g,n) >>";
-      std::cin >> action;
-      std::cin.ignore();
-      if (action == 's' ||
-          action == 'g' ||
-          action == 'n')
-        break;
+    std::cout << "==>";
+    std::getline(std::cin, input);
+    args = TokenSplit(input, ' ');
+    
+    if (args[0] == "set") {
+      // navigator SetValue
+      Navigator.SetValue(args[1], args[2]);
+      std::cout << "value set" << std::endl;
     }
-
-    if (action == 's') {
-      std::cout << "value >>";
-      std::getline(std::cin, value);
+    else if (args[0] == "get") {
+      // navigator GetValue
+      nsValue = Navigator.GetValue(args[1]);
+      std::cout << *nsValue << std::endl;
     }
-
-    switch (action) {
-      case 's':
-        Navigator.SetValue(path, value);
-        break;
-      case 'g':
-        nsValue = Navigator.GetValue(path);
-        std::cout << *nsValue << std::endl;
-        break;
-      case 'n':
-        Navigator.CreateNodes(path);
-        break;
+    else {
+      std::cout << "?" << input << std::endl;
     }
   }
   return 0;

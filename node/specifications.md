@@ -50,9 +50,9 @@ _For function names, languages should follow their specific styling guidelines_
 * Synopsis: all child nodes under this node.
 * Type: collection of nodes
 
-#### values
-* Synopsis: a map of all values under this node.
-* Type: map of string to object (any)
+#### value
+* Synopsis: the value represented by this node.
+* Type: any (or template)
 
 ---
 
